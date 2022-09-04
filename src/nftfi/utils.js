@@ -66,6 +66,12 @@ class Utils {
     return this.#ethers.utils.formatEther(weiString);
   }
 
+  formatWei(eth) {
+    const ethString = eth.toString()
+    const wei = this.#ethers.utils.parseUnits(ethString, 'ether')
+    return wei;
+  }
+
   /**
    * Calculates the loan repayment amount given its other parameters.
    *

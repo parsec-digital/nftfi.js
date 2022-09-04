@@ -111,15 +111,19 @@ class Offers {
   async create(options) {
     options = { ...options.listing, ...options }; // copying options.listing fields onto the root, for backwards compatibility.
     let errors;
-    let response;
+    const simulationDryRun = options?.simulation?.dryRun || false
     const contractName = options.nftfi.contract.name;
     switch (contractName) {
       case 'v2-1.loan.fixed': {
         let payload = await this.#helper.constructV2Offer(options);
-        response = await this.#api.post({
-          uri: 'offers',
-          payload
-        });
+        if (simulationDryRun === false) {
+          response = await this.#api.post({
+            uri: 'offers',
+            payload
+          });
+        } else {
+          response = payload
+        }
         break;
       }
       default: {
