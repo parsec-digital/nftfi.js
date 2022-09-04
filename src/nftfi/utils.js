@@ -70,6 +70,12 @@ class Utils {
     return this.#ethers.utils.formatEther(weiString);
   }
 
+  formatWei(eth) {
+    const ethString = eth.toString()
+    const wei = this.#ethers.utils.parseUnits(ethString, 'ether')
+    return wei;
+  }
+
   /**
    * Formats an amount of wei into a decimal string representing the amount of unit.
    *
