@@ -41,9 +41,11 @@ export default {
     }
 
     const hasApiKey = options?.config?.api?.key;
+    const hasGnosisSafeSigners = options?.ethereum?.account?.multisig?.gnosis?.safe?.owners?.signers;
     const hasGnosisSafePks = options?.ethereum?.account?.multisig?.gnosis?.safe?.owners?.privateKeys;
     const hasGnosisSafeAddress = options?.ethereum?.account?.multisig?.gnosis?.safe?.address;
     const hasAccountPk = options?.ethereum?.account?.privateKey;
+    const hasAccountSigner = options?.ethereum?.account?.signer;
     const hasAccountAddress = options?.ethereum?.account?.address;
     const hasWeb3Provider = options?.ethereum?.web3?.provider;
     const hasProviderUrl = options?.ethereum?.provider?.url;
@@ -51,13 +53,13 @@ export default {
     if (!hasWeb3Provider && !hasProviderUrl) {
       throw 'Please provide a value for the ethereum.provider.url field in the options parameter.';
     }
-    if (!hasWeb3Provider && !hasGnosisSafePks && !hasAccountPk) {
+    if (!hasWeb3Provider && !hasGnosisSafePks && !hasGnosisSafeSigners && !hasAccountPk && !hasAccountSigner) {
       throw 'Please provide a value for the ethereum.account.privateKey field in the options parameter.';
     }
     if (!hasApiKey) {
       throw 'Please provide a value for the api.key field in the options parameter.';
     }
-    if (!hasGnosisSafeAddress && !hasAccountPk && !hasAccountAddress) {
+    if (!hasGnosisSafeAddress && !hasAccountPk && !hasAccountSigner && !hasAccountAddress) {
       throw 'Please provide a value for the ethereum.account.address field in the options parameter.';
     }
     if (
@@ -80,15 +82,15 @@ export default {
         ...options.config
       }
     });
-
     // Create an account, which is either an EOA or Multisig (Gnosis)
     let account;
     let signer;
     if (options.ethereum?.account?.multisig?.gnosis) {
       const gnosisOptions = options.ethereum?.account?.multisig?.gnosis;
       const privateKeys = gnosisOptions?.safe?.owners.privateKeys;
+      const signers = gnosisOptions?.safe?.owners.signers;
       const service = new SafeService(config.ethereum.account.multisig.gnosis.service.url);
-      signer = new ethersjs.Wallet(privateKeys[0], provider);
+      signer = signers[0] || new ethersjs.Wallet(privateKeys[0], provider);
       const ethAdapter = new EthersAdapter.default({ ethers: ethersjs, signer });
       const safeAddress = gnosisOptions?.safe?.address;
       const safe = await Safe.default.create({
@@ -96,17 +98,32 @@ export default {
         safeAddress
       });
       const safeSigner = new SafeEthersSigner(safe, service, provider);
-      const owners = privateKeys.map(function (privateKey) {
-        return new MultisigGnosisOwner({
-          multisig: { safe: { address: safeAddress } },
-          config,
-          ethers,
-          privateKey,
-          provider,
-          EthersAdapter,
-          Safe
+      let owners;
+      if (signers) {
+        owners = signers.map(function (signer) {
+          return new MultisigGnosisOwner({
+            multisig: { safe: { address: safeAddress } },
+            config,
+            ethers,
+            signer,
+            provider,
+            EthersAdapter,
+            Safe
+          });
         });
-      });
+      } else {
+        owners = privateKeys.map(function (privateKey) {
+          return new MultisigGnosisOwner({
+            multisig: { safe: { address: safeAddress } },
+            config,
+            ethers,
+            privateKey,
+            provider,
+            EthersAdapter,
+            Safe
+          });
+        });
+      }
       const gnosis = new MultisigGnosis({
         address: gnosisOptions?.safe?.address,
         owners,
@@ -122,8 +139,9 @@ export default {
       });
     } else {
       const pk = options?.ethereum?.account?.privateKey;
-      const address = options?.ethereum?.account?.address || ethersjs.utils.computeAddress(pk);
-      signer = !pk ? await provider.getSigner(address) : new ethersjs.Wallet(pk, provider);
+      let signer = options?.ethereum?.account?.signer;
+      const address = signer?.getAddress() || options?.ethereum?.account?.address || ethersjs.utils.computeAddress(pk);
+      signer = signer || (!pk ? await provider.getSigner(address) : new ethersjs.Wallet(pk, provider));
       const eoa = new EOA({ address, signer, provider });
       account = new Account({ account: options?.dependencies?.account || eoa });
     }

@@ -24,9 +24,9 @@ class MultisigGnosis {
     return this.#address;
   }
 
-  getAuthAddress() {
+  async getAuthAddress() {
     const owner = this.#owners[0];
-    const address = owner.getAddress();
+    const address = await owner.getAddress();
     return address;
   }
 
@@ -63,7 +63,7 @@ class MultisigGnosis {
 
   async authSign(message) {
     const owner = this.#owners[0];
-    const signer = new this.#ethers.Wallet(owner.getPrivateKey(), this.#provider);
+    const signer = owner.getSigner() || new this.#ethers.Wallet(owner.getPrivateKey(), this.#provider);
     const signedMsg = await signer.signMessage(message);
     return signedMsg;
   }
@@ -72,7 +72,7 @@ class MultisigGnosis {
     let signatures = await Promise.all(
       this.#owners.map(async owner => {
         let signature = {
-          address: owner.getAddress(),
+          address: await owner.getAddress(),
           data: await owner.sign(message)
         };
         return signature;

@@ -16,8 +16,8 @@ class Auth {
   async getToken() {
     if (!this.#token) {
       const nonce = this.#utils.getNonce();
-      const accountAddress = this.#account.getAuthAddress();
-      const message = `This message proves you own this wallet address : ${this.#account.getAuthAddress()}`;
+      const accountAddress = await this.#account.getAuthAddress();
+      const message = `This message proves you own this wallet address : ${await this.#account.getAuthAddress()}`;
       const messageToSign = `${message}\r\n\r\nChainId : ${this.#config.chainId}\r\nNonce : ${nonce})`;
       const signedMessage = await this.#account.authSign(messageToSign);
       const multisig = this.#account.isMultisig();
