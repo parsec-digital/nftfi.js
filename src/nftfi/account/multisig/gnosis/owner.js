@@ -1,6 +1,7 @@
 class MultisigGnosisOwner {
   #ethers;
   #privateKey;
+  #signer;
   #config;
   #multisig;
   #provider;
@@ -12,6 +13,7 @@ class MultisigGnosisOwner {
     this.#config = options?.config;
     this.#ethers = options?.ethers;
     this.#privateKey = options?.privateKey;
+    this.#signer = options?.signer;
     this.#provider = options?.provider;
     this.#EthersAdapter = options?.EthersAdapter;
     this.#Safe = options?.Safe;
@@ -20,14 +22,19 @@ class MultisigGnosisOwner {
   getPrivateKey() {
     return this.#privateKey;
   }
+  
+  getSigner() {
+    return this.#signer;
+  }
 
-  getAddress() {
-    return this.#ethers.utils.computeAddress(this.#privateKey);
+  async getAddress() {
+    const signerAddress = await this.#signer?.getAddress()
+    return signerAddress || this.#ethers.utils.computeAddress(this.#privateKey);
   }
 
   getSafeSDK() {
     const safeAddress = this.#multisig.safe.address;
-    const signer = new this.#ethers.Wallet(this.getPrivateKey(), this.#provider);
+    const signer = this.getSigner() || new this.#ethers.Wallet(this.getPrivateKey(), this.#provider);
     const ethAdapter = new this.#EthersAdapter.default({
       ethers: this.#ethers,
       signerOrProvider: signer
@@ -50,7 +57,8 @@ class MultisigGnosisOwner {
       { SafeMessage },
       { message }
     );
-    let wallet = new this.#ethers.Wallet(this.getPrivateKey());
+    const signer = this.getSigner()
+    let wallet = signer || new this.#ethers.Wallet(this.getPrivateKey());
     let signature = (await wallet.signMessage(this.#ethers.utils.arrayify(hash)))
       .replace(/1b$/, '1f')
       .replace(/1c$/, '20');

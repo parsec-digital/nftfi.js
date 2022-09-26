@@ -125,7 +125,7 @@ class OffersHelper {
         address: options.nft.address
       },
       lender: {
-        address: this.#account.getAddress(),
+        address: await this.#account.getAddress(),
         nonce: lenderNonce
       },
       borrower: {

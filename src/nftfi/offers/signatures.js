@@ -77,7 +77,7 @@ class OffersSignatures {
             options.offer.referrer.address,
             options.offer.terms.loan.duration,
             options.offer.nftfi.fee.bps,
-            this.#account.getAddress(),
+            await this.#account.getAddress(),
             options.offer.lender.nonce,
             options.offer.terms.loan.expiry,
             this.#config.loan.fixed.collection.v2_3.address,
