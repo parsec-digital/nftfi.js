@@ -111,6 +111,7 @@ class Offers {
   async create(options) {
     options = { ...options.listing, ...options }; // copying options.listing fields onto the root, for backwards compatibility.
     let errors;
+    let response;
     const simulationDryRun = options?.simulation?.dryRun || false
     const contractName = options.nftfi.contract.name;
     switch (contractName) {
