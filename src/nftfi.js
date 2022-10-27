@@ -74,34 +74,15 @@ export default {
     const hasGnosisSafePks = options?.ethereum?.account?.multisig?.gnosis?.safe?.owners?.privateKeys;
     const hasGnosisSafeAddress = options?.ethereum?.account?.multisig?.gnosis?.safe?.address;
     const hasAccountPk = options?.ethereum?.account?.privateKey;
-<<<<<<< HEAD
-=======
-    const hasAccountSigner = options?.ethereum?.account?.signer;
-    const hasAccountAddress = options?.ethereum?.account?.address;
->>>>>>> cf352327 (updates)
     const hasWeb3Provider = options?.ethereum?.web3?.provider;
     const localStorage =
       typeof window !== 'undefined' && typeof window?.localStorage !== 'undefined' ? window.localStorage : null;
 
-<<<<<<< HEAD
     if (!hasApiKey) {
       throw 'Please provide a value for the api.key field in the options parameter.';
     }
     if (hasGnosisSafePks && !hasGnosisSafeAddress) {
       throw 'Please provide a value for the ethereum.account.multisig.gnosis.safe.address field in the options parameter.';
-=======
-    if (!hasWeb3Provider && !hasProviderUrl) {
-      throw 'Please provide a value for the ethereum.provider.url field in the options parameter.';
-    }
-    if (!hasWeb3Provider && !hasGnosisSafePks && !hasGnosisSafeSigners && !hasAccountPk && !hasAccountSigner) {
-      throw 'Please provide a value for the ethereum.account.privateKey field in the options parameter.';
-    }
-    if (!hasApiKey) {
-      throw 'Please provide a value for the api.key field in the options parameter.';
-    }
-    if (!hasGnosisSafeAddress && !hasAccountPk && !hasAccountSigner && !hasAccountAddress) {
-      throw 'Please provide a value for the ethereum.account.address field in the options parameter.';
->>>>>>> cf352327 (updates)
     }
     if (
       (hasGnosisSafePks && (hasWeb3Provider || hasAccountPk)) ||
@@ -140,13 +121,8 @@ export default {
       const privateKeys = gnosisOptions?.safe?.owners.privateKeys;
       const signers = gnosisOptions?.safe?.owners.signers;
       const service = new SafeService(config.ethereum.account.multisig.gnosis.service.url);
-<<<<<<< HEAD
-      signer = new ethersjs.Wallet(privateKeys[0], provider);
-      const ethAdapter = new EthersAdapter.default({ ethers: ethersjs, signerOrProvider: signer });
-=======
       signer = signers[0] || new ethersjs.Wallet(privateKeys[0], provider);
       const ethAdapter = new EthersAdapter.default({ ethers: ethersjs, signer });
->>>>>>> cf352327 (updates)
       const safeAddress = gnosisOptions?.safe?.address;
       const safe = await Safe.default.create({
         ethAdapter,
@@ -194,7 +170,6 @@ export default {
       });
     } else {
       const pk = options?.ethereum?.account?.privateKey;
-<<<<<<< HEAD
       if (pk && !ethersjs.utils.isHexString(pk, 32)) {
         throw "Please provide a valid private key. It should start with '0x'.";
       }
@@ -221,11 +196,6 @@ export default {
       if (pk) {
         signer = new ethersjs.Wallet(pk, provider);
       }
-=======
-      let signer = options?.ethereum?.account?.signer;
-      const address = signer?.getAddress() || options?.ethereum?.account?.address || ethersjs.utils.computeAddress(pk);
-      signer = signer || (!pk ? await provider.getSigner(address) : new ethersjs.Wallet(pk, provider));
->>>>>>> cf352327 (updates)
       const eoa = new EOA({ address, signer, provider });
       account = new Account({ account: options?.dependencies?.account || eoa });
     }
