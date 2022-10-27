@@ -146,7 +146,8 @@ export default {
       account = new Account({ account: options?.dependencies?.account || eoa });
     }
     /////////////////////////////
-    const http = new Http({ axios });
+    const axs = options?.dependencies?.axios || axios;
+    const http = new Http({ axios: axs });
     const utils = options?.dependencies?.utils || new Utils({ ethers, BN, Date, Math, Number, web3 });
     const auth = new Auth({ http, account, config, utils });
     const api = options?.dependencies?.api || new Api({ config, auth, http });
