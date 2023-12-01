@@ -42,9 +42,9 @@ import Error from './nftfi/error.js';
 import NFTfi from './nftfi/index.js';
 import Storage from './nftfi/storage.js';
 
-import { SafeEthersSigner, SafeService } from '@safe-global/safe-ethers-adapters';
-import Safe from '@safe-global/safe-core-sdk';
-import EthersAdapter from '@safe-global/safe-ethers-lib';
+import { SafeEthersSigner, SafeService } from '@gnosis.pm/safe-ethers-adapters';
+import Safe from '@gnosis.pm/safe-core-sdk';
+import EthersAdapter from '@gnosis.pm/safe-ethers-lib';
 import BN from 'bn.js';
 import { ethers as ethersjs } from 'ethers';
 import web3 from 'web3';
@@ -122,7 +122,7 @@ export default {
       const signers = gnosisOptions?.safe?.owners.signers;
       const service = new SafeService(config.ethereum.account.multisig.gnosis.service.url);
       signer = signers[0] || new ethersjs.Wallet(privateKeys[0], provider);
-      const ethAdapter = new EthersAdapter.default({ ethers: ethersjs, signer });
+      const ethAdapter = new EthersAdapter.default({ ethers: ethersjs, signerOrProvider: provider });
       const safeAddress = gnosisOptions?.safe?.address;
       const safe = await Safe.default.create({
         ethAdapter,
